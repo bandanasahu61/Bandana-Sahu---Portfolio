@@ -50,4 +50,4 @@ This project is a personal portfolio website built using HTML, CSS, and JavaScri
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/portfolio-website.git
+   git clone https://github.com/bandanasahu61Bandana-Sahu---Portfolio.git
