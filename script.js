@@ -148,24 +148,259 @@ function animateSkillBar(skillBar) {
     skillBar.style.width = `${progress}%`;
 }
 
-// Project Cards
+// Project Cards Initialization
 function initializeProjectCards() {
     const projects = document.querySelectorAll('.project-card');
     
     projects.forEach(project => {
+        // Create ripple effect element
+        const ripple = document.createElement('div');
+        ripple.className = 'ripple-effect';
+        project.appendChild(ripple);
+
+        // Mouse Enter Event
         project.addEventListener('mouseenter', (e) => {
             const overlay = project.querySelector('.project-overlay');
+            const projectImage = project.querySelector('.project-image');
+            const projectDetails = project.querySelector('.project-details');
+            const techStack = project.querySelector('.tech-stack');
+
+            // Animate overlay
             overlay.style.opacity = '1';
+            
+            // Animate project card
             project.style.transform = 'translateY(-10px)';
+            project.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.2)';
+
+            // Animate project image
+            if (projectImage) {
+                projectImage.style.transform = 'scale(1.1)';
+            }
+
+            // Animate project details
+            if (projectDetails) {
+                projectDetails.style.transform = 'translateY(0)';
+                projectDetails.style.opacity = '1';
+            }
+
+            // Animate tech stack tags
+            if (techStack) {
+                const tags = techStack.querySelectorAll('.tech-tag');
+                tags.forEach((tag, index) => {
+                    tag.style.transform = 'translateY(0)';
+                    tag.style.opacity = '1';
+                    tag.style.transitionDelay = `${index * 0.1}s`;
+                });
+            }
+
+            // Add active class
+            project.classList.add('active');
         });
 
+        // Mouse Leave Event
         project.addEventListener('mouseleave', (e) => {
             const overlay = project.querySelector('.project-overlay');
+            const projectImage = project.querySelector('.project-image');
+            const projectDetails = project.querySelector('.project-details');
+            const techStack = project.querySelector('.tech-stack');
+
+            // Reset overlay
             overlay.style.opacity = '0';
+            
+            // Reset project card
             project.style.transform = 'translateY(0)';
+            project.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.1)';
+
+            // Reset project image
+            if (projectImage) {
+                projectImage.style.transform = 'scale(1)';
+            }
+
+            // Reset project details
+            if (projectDetails) {
+                projectDetails.style.transform = 'translateY(20px)';
+                projectDetails.style.opacity = '0';
+            }
+
+            // Reset tech stack tags
+            if (techStack) {
+                const tags = techStack.querySelectorAll('.tech-tag');
+                tags.forEach(tag => {
+                    tag.style.transform = 'translateY(20px)';
+                    tag.style.opacity = '0';
+                    tag.style.transitionDelay = '0s';
+                });
+            }
+
+            // Remove active class
+            project.classList.remove('active');
         });
+
+        // Click Event
+        project.addEventListener('click', (e) => {
+            // Create ripple effect
+            const rect = project.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+            ripple.classList.add('active');
+
+            // Remove ripple after animation
+            setTimeout(() => {
+                ripple.classList.remove('active');
+            }, 500);
+
+            // Handle project link if clicked on link elements
+            if (!e.target.closest('a')) {
+                const projectLink = project.dataset.projectUrl;
+                if (projectLink) {
+                    window.open(projectLink, '_blank');
+                }
+            }
+        });
+
+        // Touch Events for mobile
+        project.addEventListener('touchstart', handleTouchStart, false);
+        project.addEventListener('touchend', handleTouchEnd, false);
     });
 }
+
+// Touch Event Handlers
+let touchTimeout;
+
+function handleTouchStart(e) {
+    const project = e.currentTarget;
+    
+    // Clear any existing timeout
+    if (touchTimeout) {
+        clearTimeout(touchTimeout);
+    }
+
+    // Add touch effect
+    project.classList.add('touch-active');
+}
+
+function handleTouchEnd(e) {
+    const project = e.currentTarget;
+    
+    // Remove touch effect with delay
+    touchTimeout = setTimeout(() => {
+        project.classList.remove('touch-active');
+    }, 300);
+}
+
+// Add corresponding CSS
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `
+    .project-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 15px;
+        background: var(--card-bg);
+        transition: all 0.3s ease;
+    }
+
+    .project-image {
+        width: 100%;
+        height: 200px;
+        overflow: hidden;
+        transition: transform 0.5s ease;
+    }
+
+    .project-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .project-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+
+    .project-details {
+        padding: 20px;
+        transform: translateY(20px);
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .tech-stack {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px 20px;
+    }
+
+    .tech-tag {
+        padding: 5px 10px;
+        background: var(--tag-bg);
+        border-radius: 15px;
+        font-size: 0.8rem;
+        transform: translateY(20px);
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .ripple-effect {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.7);
+        transform: scale(0);
+        pointer-events: none;
+        width: 100px;
+        height: 100px;
+        margin: -50px;
+    }
+
+    .ripple-effect.active {
+        animation: ripple 0.5s ease-out;
+    }
+
+    .project-card.touch-active {
+        transform: scale(0.98);
+    }
+
+    @keyframes ripple {
+        from {
+            transform: scale(0);
+            opacity: 1;
+        }
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+
+    /* Dark mode support */
+    [data-theme="dark"] .project-card {
+        background: var(--dark-card-bg);
+    }
+
+    [data-theme="dark"] .tech-tag {
+        background: var(--dark-tag-bg);
+        color: var(--dark-text);
+    }
+`;
+
+document.head.appendChild(styleSheet);
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', initializeProjectCards);
+
 
 // Contact Form
 function initializeContactForm() {
